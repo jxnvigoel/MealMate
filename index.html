@@ -3,27 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DrinkMate - Your Cocktail Guide</title>
-    <meta name="description" content="Discover popular cocktails with DrinkMate. A simple and easy-to-use cocktail guide.">
+    <title>DrinkMate | The Ultimate Cocktail Finder</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header>
-        <h1>DrinkMate</h1>
-        <p>Explore our collection of drinks</p>
+    <nav class="navbar">
+        <div class="logo">Drink<span>Mate</span></div>
+        <button id="theme-btn" class="theme-toggle">☀️ Light Mode</button>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Discover Your <br>Next Favorite Drink</h1>
+            <p>Explore thousands of cocktails with detailed ingredients and instructions.</p>
+        </div>
+        
+        <div class="search-bar-wrapper">
+            <div class="search-container">
+                <input type="text" id="search-box" placeholder="Search cocktails...">
+                <select id="type-filter">
+                    <option value="all">All Types</option>
+                    <option value="alcoholic">Alcoholic</option>
+                    <option value="non alcoholic">Non-Alcoholic</option>
+                </select>
+                <div class="button-group">
+                    <button id="sort-btn" class="secondary-btn">A-Z Sort</button>
+                    <button id="fav-view-btn" class="accent-btn">My Favorites</button>
+                </div>
+            </div>
+        </div>
     </header>
 
-    <main>
-        <div id="loading-text">Loading drinks...</div>
-        <div id="error-message" style="display: none;">Error loading data. Please try again later.</div>
-        <div id="drinks-container" class="grid-container"></div>
+    <main class="main-content">
+        <div id="status-msg" class="loader-text">Loading drinks...</div>
+        <div id="drinks-grid" class="cards-grid"></div>
     </main>
 
-    <footer>
-        <p>&copy; 2026 DrinkMate</p>
+    <div id="drink-modal" class="modal-backdrop">
+        <div class="modal-box">
+            <button class="close-modal">&times;</button>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <p>DrinkMate &copy; 2026</p>
     </footer>
-    
+
     <script src="script.js"></script>
 </body>
 </html>
