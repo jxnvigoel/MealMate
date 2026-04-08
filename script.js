@@ -1,175 +1,238 @@
 document.addEventListener('DOMContentLoaded', function() {
+    const landingSection = document.getElementById('landing-section');
+    const mainContent = document.getElementById('main-content');
     const drinksGrid = document.getElementById('drinks-grid');
     const statusMsg = document.getElementById('status-msg');
     const searchBox = document.getElementById('search-box');
-    const typeFilter = document.getElementById('type-filter');
     const sortBtn = document.getElementById('sort-btn');
     const favViewBtn = document.getElementById('fav-view-btn');
     const themeBtn = document.getElementById('theme-btn');
+    const sectionTitle = document.getElementById('section-title');
+    const backHome = document.getElementById('back-home');
+    const logoHome = document.getElementById('logo-home');
     const modal = document.getElementById('drink-modal');
     const modalContent = document.getElementById('modal-content');
     const closeModal = document.querySelector('.close-modal');
 
-    let allDrinks = [];
-    let isShowingFavs = false;
-    const apiUrl = 'https://www.thecocktaildb.com/api/json/v1/1/search.php?s=a';
+    const btnAlcoholic = document.getElementById('btn-alcoholic');
+    const btnNonAlcoholic = document.getElementById('btn-non-alcoholic');
 
-    function fetchInitialDrinks() {
-        statusMsg.textContent = 'Loading drinks...';
-        fetch(apiUrl)
-            .then(function(res) { return res.json(); })
-            .then(function(data) {
-                statusMsg.textContent = '';
-                if (data.drinks) {
-                    allDrinks = data.drinks;
-                    renderProducts(allDrinks);
-                } else {
-                    statusMsg.textContent = 'No drinks found.';
+    let allDrinks = [];
+    let currentCategory = 'Alcoholic';
+    let showingFavs = false;
+
+    const apiUrls = [
+        'https://www.thecocktaildb.com/api/json/v1/1/search.php?f=a',
+        'https://www.thecocktaildb.com/api/json/v1/1/search.php?f=b',
+        'https://www.thecocktaildb.com/api/json/v1/1/search.php?f=m',
+        'https://www.thecocktaildb.com/api/json/v1/1/filter.php?a=Non_Alcoholic'
+    ];
+
+    async function fetchAllDrinks() {
+        statusMsg.textContent = 'Fetching library...';
+        try {
+            const results = await Promise.all(apiUrls.map(url => fetch(url).then(res => res.json())));
+            
+            let combined = [];
+            results.forEach((res, index) => {
+                if (res.drinks) {
+                    const processed = res.drinks.map(d => {
+                        if (apiUrls[index].includes('filter.php?a=Non_Alcoholic')) {
+                            return { ...d, strAlcoholic: 'Non Alcoholic' };
+                        }
+                        return d;
+                    });
+                    combined = [...combined, ...processed];
                 }
-            })
-            .catch(function() {
-                statusMsg.textContent = 'Error connecting to server. Please try later.';
             });
+
+            const unique = {};
+            allDrinks = combined.filter(d => {
+                if (unique[d.idDrink]) return false;
+                unique[d.idDrink] = true;
+                return true;
+            });
+            
+            statusMsg.textContent = '';
+        } catch (error) {
+            statusMsg.textContent = 'Error loading drinks. Please refresh.';
+        }
     }
 
-    function renderProducts(drinksToRender) {
+    function renderDrinks(drinksToRender) {
         drinksGrid.innerHTML = '';
-        drinksToRender.forEach(function(drink) {
+        if (drinksToRender.length === 0) {
+            statusMsg.textContent = 'No drinks found.';
+            return;
+        }
+        statusMsg.textContent = '';
+
+        drinksToRender.forEach(drink => {
+            const isFav = checkIfFav(drink.idDrink);
             const card = document.createElement('div');
             card.className = 'drink-card';
-            
-            const favText = isDrinkInFavorites(drink.idDrink) ? '❤ Remove' : '🤍 Favorite';
-            
             card.innerHTML = `
                 <img src="${drink.strDrinkThumb}" alt="${drink.strDrink}">
                 <div class="card-info">
                     <h3>${drink.strDrink}</h3>
-                    <p>${drink.strAlcoholic}</p>
+                    <p>${drink.strAlcoholic || 'Drink'}</p>
                     <div class="card-btns">
-                        <button class="details-btn">View Details</button>
-                        <button class="fav-button">${favText}</button>
+                        <button class="details-btn">Details</button>
+                        <button class="fav-button">${isFav ? '❤ Remove' : '🤍 Favorite'}</button>
                     </div>
                 </div>
             `;
             
-            card.querySelector('.details-btn').onclick = function() { openDetails(drink); };
-            card.querySelector('.fav-button').onclick = function() { toggleFav(drink); };
-            
+            card.querySelector('.details-btn').onclick = () => openModal(drink);
+            card.querySelector('.fav-button').onclick = () => toggleFavorite(drink);
             drinksGrid.appendChild(card);
         });
     }
 
-    function updateDisplay() {
-        const sourceData = isShowingFavs ? getFavsFromStorage() : allDrinks;
-        const searchText = searchBox.value.toLowerCase();
-        const typeValue = typeFilter.value;
+    function updateView() {
+        let filtered = [];
+        
+        if (showingFavs) {
+            filtered = getFavorites();
+            sectionTitle.textContent = 'My Favorites';
+        } else {
+            filtered = allDrinks.filter(d => d.strAlcoholic === currentCategory);
+            sectionTitle.textContent = currentCategory + ' Drinks';
+        }
 
-        const filtered = sourceData.filter(function(drink) {
-            const matchesName = drink.strDrink.toLowerCase().includes(searchText);
-            const matchesType = typeValue === 'all' || drink.strAlcoholic.toLowerCase() === typeValue;
-            return matchesName && matchesType;
-        });
+        const searchTerm = searchBox.value.toLowerCase();
+        if (searchTerm) {
+            filtered = filtered.filter(d => d.strDrink.toLowerCase().includes(searchTerm));
+        }
 
-        renderProducts(filtered);
+        renderDrinks(filtered);
     }
 
-    searchBox.oninput = updateDisplay;
-    typeFilter.onchange = updateDisplay;
+    function switchPage(page) {
+        if (page === 'home') {
+            landingSection.classList.remove('hidden');
+            mainContent.classList.add('hidden');
+            showingFavs = false;
+            searchBox.value = '';
+        } else {
+            landingSection.classList.add('hidden');
+            mainContent.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+    }
 
-    sortBtn.onclick = function() {
-        const sourceData = isShowingFavs ? getFavsFromStorage() : allDrinks;
-        const searchText = searchBox.value.toLowerCase();
-        const typeValue = typeFilter.value;
-
-        const filtered = sourceData.filter(function(drink) {
-            const matchesName = drink.strDrink.toLowerCase().includes(searchText);
-            const matchesType = typeValue === 'all' || drink.strAlcoholic.toLowerCase() === typeValue;
-            return matchesName && matchesType;
-        });
-
-        filtered.sort(function(a, b) {
-            if (a.strDrink < b.strDrink) return -1;
-            if (a.strDrink > b.strDrink) return 1;
-            return 0;
-        });
-
-        renderProducts(filtered);
+    btnAlcoholic.onclick = () => {
+        currentCategory = 'Alcoholic';
+        switchPage('main');
+        updateView();
     };
 
-    favViewBtn.onclick = function() {
-        isShowingFavs = !isShowingFavs;
-        favViewBtn.textContent = isShowingFavs ? 'Show All Drinks' : 'My Favorites';
-        updateDisplay();
+    btnNonAlcoholic.onclick = () => {
+        currentCategory = 'Non Alcoholic';
+        switchPage('main');
+        updateView();
     };
 
-    function openDetails(drink) {
+    backHome.onclick = () => switchPage('home');
+    logoHome.onclick = () => switchPage('home');
+
+    searchBox.oninput = updateView;
+
+    sortBtn.onclick = () => {
+        let filtered = showingFavs ? getFavorites() : allDrinks.filter(d => d.strAlcoholic === currentCategory);
+        const searchTerm = searchBox.value.toLowerCase();
+        if (searchTerm) filtered = filtered.filter(d => d.strDrink.toLowerCase().includes(searchTerm));
+
+        filtered.sort((a, b) => a.strDrink.localeCompare(b.strDrink));
+        renderDrinks(filtered);
+    };
+
+    favViewBtn.onclick = () => {
+        showingFavs = !showingFavs;
+        favViewBtn.textContent = showingFavs ? 'Show All' : 'My Favorites';
+        if (showingFavs) switchPage('main');
+        updateView();
+    };
+
+    async function openModal(drink) {
+        modalContent.innerHTML = '<p class="loader-text">Loading details...</p>';
+        modal.style.display = 'flex';
+
+        let fullDrink = drink;
+        if (!drink.strInstructions) {
+            try {
+                const res = await fetch(`https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=${drink.idDrink}`);
+                const data = await res.json();
+                if (data.drinks) fullDrink = data.drinks[0];
+            } catch (err) {
+                modalContent.innerHTML = '<p>Error loading details.</p>';
+                return;
+            }
+        }
+
         let ingredientsHTML = '';
         for (let i = 1; i <= 15; i++) {
-            const name = drink['strIngredient' + i];
-            const amount = drink['strMeasure' + i];
-            if (name) {
-                ingredientsHTML += `<li>${amount || ''} ${name}</li>`;
+            const ingredient = fullDrink['strIngredient' + i];
+            const measure = fullDrink['strMeasure' + i];
+            if (ingredient) {
+                ingredientsHTML += `<li>${measure || ''} ${ingredient}</li>`;
             }
         }
 
         modalContent.innerHTML = `
-            <h2>${drink.strDrink}</h2>
-            <img src="${drink.strDrinkThumb}" style="width:100%; border-radius:12px; margin: 15px 0;">
-            <p><strong>Category:</strong> ${drink.strCategory}</p>
-            <p><strong>Type:</strong> ${drink.strAlcoholic}</p>
-            <p><strong>Glass:</strong> ${drink.strGlass}</p>
-            <h3 style="margin-top: 15px;">Ingredients</h3>
+            <h2 style="margin-bottom: 20px;">${fullDrink.strDrink}</h2>
+            <img src="${fullDrink.strDrinkThumb}" style="width:100%; border-radius:20px; margin-bottom: 20px;">
+            <p><strong>Category:</strong> ${fullDrink.strCategory || 'N/A'}</p>
+            <p><strong>Glass:</strong> ${fullDrink.strGlass || 'N/A'}</p>
+            <h3 style="margin: 20px 0 10px 0;">Ingredients</h3>
             <ul>${ingredientsHTML}</ul>
-            <h3 style="margin-top: 15px;">Steps</h3>
-            <p>${drink.strInstructions}</p>
+            <h3 style="margin: 20px 0 10px 0;">Instructions</h3>
+            <p>${fullDrink.strInstructions || 'No instructions available.'}</p>
         `;
-        modal.style.display = 'flex';
     }
 
-    closeModal.onclick = function() { modal.style.display = 'none'; };
-    window.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
+    closeModal.onclick = () => modal.style.display = 'none';
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
-    function getFavsFromStorage() {
-        const saved = localStorage.getItem('dm_favorites');
-        return saved ? JSON.parse(saved) : [];
+    function getFavorites() {
+        const favs = localStorage.getItem('dm_favs');
+        return favs ? JSON.parse(favs) : [];
     }
 
-    function isDrinkInFavorites(id) {
-        const favs = getFavsFromStorage();
-        return favs.some(function(f) { return f.idDrink === id; });
+    function checkIfFav(id) {
+        return getFavorites().some(f => f.idDrink === id);
     }
 
-    function toggleFav(drink) {
-        let favs = getFavsFromStorage();
-        const isIn = favs.some(function(f) { return f.idDrink === drink.idDrink; });
-
-        if (isIn) {
-            favs = favs.filter(function(f) { return f.idDrink !== drink.idDrink; });
+    function toggleFavorite(drink) {
+        let favs = getFavorites();
+        const exists = favs.some(f => f.idDrink === drink.idDrink);
+        if (exists) {
+            favs = favs.filter(f => f.idDrink !== drink.idDrink);
         } else {
             favs.push(drink);
         }
-
-        localStorage.setItem('dm_favorites', JSON.stringify(favs));
-        updateDisplay();
+        localStorage.setItem('dm_favs', JSON.stringify(favs));
+        updateView();
     }
 
-    themeBtn.onclick = function() {
-        const bodyAttr = document.body.getAttribute('data-theme');
-        const newTheme = bodyAttr === 'light' ? 'dark' : 'light';
-        
-        document.body.setAttribute('data-theme', newTheme);
-        themeBtn.textContent = newTheme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
-        localStorage.setItem('dm_theme', newTheme);
+    themeBtn.onclick = () => {
+        const isDark = document.body.getAttribute('data-theme') !== 'light';
+        const nextTheme = isDark ? 'light' : 'dark';
+        if (nextTheme === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+            themeBtn.textContent = '🌙 Dark Mode';
+        } else {
+            document.body.removeAttribute('data-theme');
+            themeBtn.textContent = '☀️ Light Mode';
+        }
+        localStorage.setItem('dm_theme', nextTheme);
     };
 
-    const savedTheme = localStorage.getItem('dm_theme') || 'dark';
+    const savedTheme = localStorage.getItem('dm_theme');
     if (savedTheme === 'light') {
         document.body.setAttribute('data-theme', 'light');
         themeBtn.textContent = '🌙 Dark Mode';
-    } else {
-        document.body.removeAttribute('data-theme');
-        themeBtn.textContent = '☀️ Light Mode';
     }
 
-    fetchInitialDrinks();
+    fetchAllDrinks();
 });

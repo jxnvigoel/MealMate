@@ -7,36 +7,48 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="fade-in">
 
     <nav class="navbar">
-        <div class="logo">Drink<span>Mate</span></div>
-        <button id="theme-btn" class="theme-toggle">☀️ Light Mode</button>
+        <div class="logo" id="logo-home">Drink<span>Mate</span></div>
+        <div class="nav-links">
+            <button id="theme-btn" class="theme-toggle">☀️ Light Mode</button>
+        </div>
     </nav>
 
-    <header class="hero">
+    <header id="landing-section" class="hero">
         <div class="hero-content">
-            <h1>Discover Your <br>Next Favorite Drink</h1>
-            <p>Explore thousands of cocktails with detailed ingredients and instructions.</p>
-        </div>
-        
-        <div class="search-bar-wrapper">
-            <div class="search-container">
-                <input type="text" id="search-box" placeholder="Search cocktails...">
-                <select id="type-filter">
-                    <option value="all">All Types</option>
-                    <option value="alcoholic">Alcoholic</option>
-                    <option value="non alcoholic">Non-Alcoholic</option>
-                </select>
-                <div class="button-group">
-                    <button id="sort-btn" class="secondary-btn">A-Z Sort</button>
-                    <button id="fav-view-btn" class="accent-btn">My Favorites</button>
+            <h1>DrinkMate</h1>
+            <p>Find your perfect drink recipe</p>
+            
+            <div class="category-cards">
+                <div class="cat-card" id="btn-alcoholic">
+                    <div class="cat-icon">🍹</div>
+                    <h3>Alcoholic Drinks</h3>
+                    <p>Classic & modern cocktails</p>
+                </div>
+                <div class="cat-card" id="btn-non-alcoholic">
+                    <div class="cat-icon">🥤</div>
+                    <h3>Non-Alcoholic</h3>
+                    <p>Refreshing mocktails & juices</p>
                 </div>
             </div>
         </div>
     </header>
 
-    <main class="main-content">
+    <main id="main-content" class="main-content hidden">
+        <div class="controls-wrapper">
+            <button id="back-home" class="back-btn">← Back to Home</button>
+            <div class="search-container">
+                <input type="text" id="search-box" placeholder="Search cocktails...">
+                <div class="button-group">
+                    <button id="sort-btn" class="secondary-btn">A-Z Sort</button>
+                    <button id="fav-view-btn" class="accent-btn">My Favorites</button>
+                </div>
+            </div>
+            <h2 id="section-title">Alcoholic Drinks</h2>
+        </div>
+
         <div id="status-msg" class="loader-text">Loading drinks...</div>
         <div id="drinks-grid" class="cards-grid"></div>
     </main>
