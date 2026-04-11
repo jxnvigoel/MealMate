@@ -13,9 +13,14 @@
 [data-theme="light"] {
     --bg-color: #f8fafc;
     --text-color: #0f172a;
-    --card-bg: #ffffff;
-    --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-    --card-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.08);
+    --secondary-text: #334155;
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+body[data-theme="light"] {
+    background-color: #f0f7ff;
 }
 
 * {
@@ -59,6 +64,12 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+[data-theme="light"] .navbar {
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid #e2e8f0;
+}
+
 .logo {
     font-size: 1.8rem;
     font-weight: 800;
@@ -86,8 +97,23 @@ body {
 .hero {
     padding: 8rem 8% 10rem 8%;
     text-align: center;
-    background: radial-gradient(circle at top left, rgba(139, 92, 246, 0.05), transparent), 
-                radial-gradient(circle at bottom right, rgba(217, 70, 239, 0.05), transparent);
+    background: linear-gradient(rgba(2, 6, 23, 0.7), rgba(2, 6, 23, 0.7)), url('hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+[data-theme="light"] .hero {
+    background: linear-gradient(rgba(200, 225, 255, 0.4), rgba(200, 225, 255, 0.4)), url('hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 .hero h1 {
@@ -95,12 +121,31 @@ body {
     font-weight: 800;
     letter-spacing: -2px;
     margin-bottom: 1rem;
+    animation: fadeIn 1s ease-out;
+}
+
+[data-theme="light"] .hero h1 {
+    color: #0c1221;
+    font-weight: 900;
+    text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
 }
 
 .hero p {
     font-size: 1.3rem;
     opacity: 0.7;
     margin-bottom: 4rem;
+    animation: fadeIn 1.2s ease-out;
+}
+
+[data-theme="light"] .hero p {
+    color: #1e293b;
+    font-weight: 600;
+    opacity: 1;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+.hero-content {
+    animation: fadeIn 0.8s ease-out;
 }
 
 .category-cards {
@@ -112,13 +157,50 @@ body {
 
 .cat-card {
     background: var(--card-bg);
-    padding: 3rem 2rem;
+    padding: 0;
     border-radius: 32px;
     width: 280px;
     cursor: pointer;
     transition: var(--transition);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+[data-theme="light"] .cat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.cat-img-wrapper {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+.cat-img-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.2));
+}
+
+.cat-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cat-card:hover .cat-img-wrapper img {
+    transform: scale(1.1);
+}
+
+.cat-info {
+    padding: 2.5rem 1.5rem;
+    text-align: center;
 }
 
 .cat-card:hover {
@@ -144,7 +226,44 @@ body {
 }
 
 .main-content {
-    padding: 2rem 8% 5rem 8%;
+    padding: 4rem 8% 8rem 8%;
+    transition: all 0.5s ease;
+    min-height: 100vh;
+}
+
+.main-content.bg-alcoholic {
+    background: linear-gradient(rgba(2, 6, 23, 0.85), rgba(2, 6, 23, 0.85)), url('hero-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.main-content.bg-non-alcoholic {
+    background: linear-gradient(rgba(2, 6, 23, 0.85), rgba(2, 6, 23, 0.85)), url('non-alcoholic-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.main-content.bg-favorites {
+    background: linear-gradient(rgba(2, 6, 23, 0.9), rgba(2, 6, 23, 0.9)), url('non-alcoholic-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+[data-theme="light"] .main-content.bg-alcoholic {
+    background: linear-gradient(rgba(200, 225, 255, 0.45), rgba(200, 225, 255, 0.45)), url('hero-bg.jpg');
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+[data-theme="light"] .main-content.bg-non-alcoholic {
+    background: linear-gradient(rgba(200, 225, 255, 0.45), rgba(200, 225, 255, 0.45)), url('non-alcoholic-bg.jpg');
+    background-size: cover;
+    background-attachment: fixed;
 }
 
 .controls-wrapper {
@@ -178,6 +297,11 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: var(--shadow);
     margin-bottom: 2rem;
+}
+
+[data-theme="light"] .search-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
 }
 
 input {
@@ -216,11 +340,11 @@ button {
 }
 
 .secondary-btn {
-    background: #f1f5f9;
-    color: #1e293b;
+    background: #cbd5e1;
+    color: #0f172a;
 }
 
-[data-theme="dark"] .secondary-btn {
+body:not([data-theme="light"]) .secondary-btn {
     background: #1e293b;
     color: #f1f5f9;
 }
@@ -240,6 +364,12 @@ button:hover {
     margin-top: 1rem;
 }
 
+[data-theme="light"] #section-title {
+    color: #0c1221;
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+}
+
 .cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -253,6 +383,12 @@ button:hover {
     transition: var(--transition);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: var(--shadow);
+}
+
+[data-theme="light"] .drink-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
 }
 
 .drink-card:hover {
@@ -327,6 +463,11 @@ button:hover {
     animation: modalIn 0.3s ease-out;
 }
 
+[data-theme="light"] .modal-box {
+    background: #f0f7ff;
+    color: #0f172a;
+}
+
 @keyframes modalIn {
     from { opacity: 0; transform: scale(0.9); }
     to { opacity: 1; transform: scale(1); }
@@ -348,6 +489,12 @@ button:hover {
     text-align: center;
     opacity: 0.6;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .site-footer {
+    color: #0f172a;
+    opacity: 0.8;
+    border-top: 1px solid #e2e8f0;
 }
 
 .loader-text {

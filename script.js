@@ -92,12 +92,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateView() {
         let filtered = [];
         
+        mainContent.classList.remove('bg-alcoholic', 'bg-non-alcoholic', 'bg-favorites');
+        
         if (showingFavs) {
             filtered = getFavorites();
             sectionTitle.textContent = 'My Favorites';
+            mainContent.classList.add('bg-favorites');
         } else {
             filtered = allDrinks.filter(d => d.strAlcoholic === currentCategory);
             sectionTitle.textContent = currentCategory + ' Drinks';
+            if (currentCategory === 'Alcoholic') {
+                mainContent.classList.add('bg-alcoholic');
+            } else {
+                mainContent.classList.add('bg-non-alcoholic');
+            }
         }
 
         const searchTerm = searchBox.value.toLowerCase();
